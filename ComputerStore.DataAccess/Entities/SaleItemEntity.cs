@@ -4,7 +4,7 @@
     {
         public Guid Id { get; set; }
 
-        public Guid SaleEntityId { get; set; }
+        public Guid SaleId { get; set; }
 
         public SaleEntity? Sale {  get; set; }
 
