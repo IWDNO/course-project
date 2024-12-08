@@ -1,4 +1,5 @@
-﻿using ComputerStore.DataAccess.Entities;
+﻿using ComputerStore.DataAccess.Configurations;
+using ComputerStore.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ComputerStore.DataAccess
@@ -18,5 +19,17 @@ namespace ComputerStore.DataAccess
         public DbSet<SupplierEntity> Suppliers { get; set; }
         public DbSet<UserEntity> Users { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfiguration(new CategoryConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductConfiguration());
+            modelBuilder.ApplyConfiguration(new RoleConfiguration());
+            modelBuilder.ApplyConfiguration(new SaleConfiguration());
+            modelBuilder.ApplyConfiguration(new SaleItemConfiguration());
+            modelBuilder.ApplyConfiguration(new SupplierConfiguration());
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

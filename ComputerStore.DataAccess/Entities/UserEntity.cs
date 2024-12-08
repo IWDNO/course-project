@@ -14,6 +14,7 @@ namespace ComputerStore.DataAccess.Entities
         
         public RoleEntity? Role { get; set; }
 
+        public List<SaleEntity> Sales { get; set; } = [];
     }
 }
 
