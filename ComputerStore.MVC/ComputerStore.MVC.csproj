@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ComputerStore.Application\ComputerStore.Application.csproj" />
     <ProjectReference Include="..\ComputerStore.DataAccess\ComputerStore.DataAccess.csproj" />
   </ItemGroup>
 

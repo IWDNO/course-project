@@ -1,3 +1,6 @@
+using ComputerStore.Application;
+using ComputerStore.Application.Implementations;
+using ComputerStore.Application.Interfaces;
 using ComputerStore.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,13 +13,24 @@ namespace ComputerStore.MVC
             var builder = WebApplication.CreateBuilder(args);
             var configuration = builder.Configuration;
 
-            builder.Services.AddControllersWithViews();
-
             builder.Services.AddDbContext<ComputerStoreDBContext>(
                 options =>
                 {
                     options.UseNpgsql(configuration.GetConnectionString(nameof(ComputerStoreDBContext)));
                 });
+
+            builder.Services.AddScoped<ICategoriesRepository, EFCategoriesRepository>();
+            builder.Services.AddScoped<IProductsRepository, EFProductsRepository>();
+            builder.Services.AddScoped<ISuppliersRepository, EFSuppliersRepository>();
+            builder.Services.AddScoped<IRolesRepository, EFRolesRepository>();
+            builder.Services.AddScoped<ISalesRepository, EFSalesRepository>();
+            builder.Services.AddScoped<ISaleItemsRepository, EFSaleItemsRepository>();
+            builder.Services.AddScoped<IUsersRepository, EFUsersRepository>();
+
+            builder.Services.AddScoped<DataManager>();
+
+            builder.Services.AddControllersWithViews();
+
 
             var app = builder.Build();
 

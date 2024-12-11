@@ -1,0 +1,23 @@
+﻿@using ComputerStore.DataAccess.Entities
+@model IEnumerable<ProductEntity>
+
+<h1>Товары в категории</h1>
+
+<ul>
+    @foreach (var product in Model)
+    {
+        <li>@product.Name</li>
+    }
+</ul>
+
+<div>
+    @if (ViewBag.Page > 1)
+    {
+        <a asp-action="ProductsByCategory" asp-route-categoryId="@ViewBag.CategoryId" asp-route-page="@(ViewBag.Page - 1)">Предыдущая</a>
+    }
+
+    @if (Model.Any())
+    {
+        <a asp-action="ProductsByCategory" asp-route-categoryId="@ViewBag.CategoryId" asp-route-page="@(ViewBag.Page + 1)">Следующая</a>
+    }
+</div>
