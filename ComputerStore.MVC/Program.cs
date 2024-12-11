@@ -3,6 +3,7 @@ using ComputerStore.Application.Implementations;
 using ComputerStore.Application.Interfaces;
 using ComputerStore.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Principal;
 
 namespace ComputerStore.MVC
 {
@@ -12,6 +13,9 @@ namespace ComputerStore.MVC
         {
             var builder = WebApplication.CreateBuilder(args);
             var configuration = builder.Configuration;
+
+            builder.Services.AddAuthorization();
+            builder.Services.AddAuthentication().AddCookie();
 
             builder.Services.AddDbContext<ComputerStoreDBContext>(
                 options =>

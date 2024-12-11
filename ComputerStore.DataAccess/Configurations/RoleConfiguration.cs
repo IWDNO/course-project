@@ -8,12 +8,12 @@ namespace ComputerStore.DataAccess.Configurations
     {
         public void Configure(EntityTypeBuilder<RoleEntity> builder)
         {
-            builder.HasKey(x => x.Id);
+            //builder.HasKey(x => x.Id);
 
-            builder.
-                HasMany(r => r.Users).
-                WithOne(u => u.Role).
-                HasForeignKey(u => u.RoleId);
+            //builder.
+            //    HasMany(r => r.Users).
+            //    WithOne(u => u.Role).
+            //    HasForeignKey(u => u.RoleId);
         }
     }
 }

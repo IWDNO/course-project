@@ -8,11 +8,11 @@ namespace ComputerStore.DataAccess.Configurations
     {
         public void Configure(EntityTypeBuilder<UserEntity> builder)
         {
-            builder.HasKey(x => x.Id);
+            //builder.HasKey(x => x.Id);
 
-            builder.HasOne(u => u.Role).WithMany(r => r.Users).HasForeignKey(u => u.RoleId);
+            //builder.HasOne(u => u.Role).WithMany(r => r.Users).HasForeignKey(u => u.RoleId);
 
-            builder.HasMany(u => u.Sales).WithOne(s => s.Seller).HasForeignKey(s => s.SellerId);
+            //builder.HasMany(u => u.Sales).WithOne(s => s.Seller).HasForeignKey(s => s.SellerId);
         }
     }
 }

@@ -1,14 +1,11 @@
-﻿namespace ComputerStore.DataAccess.Entities
-{
-    public class RoleEntity
-    {
-        public Guid Id { get; set; }
+﻿using Microsoft.AspNetCore.Identity;
 
-        public string Name { get; set; } = string.Empty;
+namespace ComputerStore.DataAccess.Entities
+{
+    public class RoleEntity : IdentityRole<Guid>
+    {
 
         public string Description { get; set; } = string.Empty;
-
-        public List<UserEntity> Users { get; set; } = [];
 
     }
 }
