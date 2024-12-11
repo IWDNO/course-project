@@ -1,0 +1,82 @@
+﻿@model ComputerStore.MVC.ViewModels.SaleViewModel
+
+<h2>Добавление заказа</h2>
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="SellerId">Продавец</label>
+        <select asp-for="SellerId" class="form-control">
+            <option value="">-- Выберите продавца --</option>
+            @foreach (var seller in Model.Sellers)
+            {
+                <option value="@seller.Id">@seller.UserName</option>
+            }
+        </select>
+        <span asp-validation-for="SellerId" class="text-danger"></span>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Товар</th>
+                <th>Цена</th>
+                <th>Количество</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.SaleItems.Count; i++)
+            {
+                <tr>
+                    <td>
+                        <input type="hidden" asp-for="SaleItems[i].ProductId" />
+                        <input type="hidden" asp-for="SaleItems[i].ProductName" />
+                        @Model.SaleItems[i].ProductName
+                    </td>
+                    <td>
+                        <input type="hidden" asp-for="SaleItems[i].Price" />
+                        @Model.SaleItems[i].Price
+                    </td>
+                    <td>
+                        <input asp-for="SaleItems[i].Quantity" class="form-control" />
+                        <span asp-validation-for="SaleItems[i].Quantity" class="text-danger"></span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="form-group">
+        <label asp-for="TotalPrice">Общая стоимость</label>
+        <input asp-for="TotalPrice" class="form-control"  />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Создать заказ</button>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Обновление общей стоимости при изменении количества
+            $('input[name^="SaleItems"]').on('input', function () {
+                let totalPrice = 0;
+
+                // Перебираем все строки таблицы
+                $('tbody tr').each(function () {
+                    // Получаем цену товара
+                    const price = parseFloat($(this).find('input[name$=".Price"]').val()) || 0;
+
+                    // Получаем количество товара
+                    const quantity = parseInt($(this).find('input[name$=".Quantity"]').val()) || 0;
+
+                    // Умножаем цену на количество и добавляем к общей стоимости
+                    totalPrice += price * quantity;
+                });
+
+                // Устанавливаем общую стоимость в поле
+                $('#TotalPrice').val(totalPrice.toFixed(2));
+            });
+        });
+    </script>
+}
