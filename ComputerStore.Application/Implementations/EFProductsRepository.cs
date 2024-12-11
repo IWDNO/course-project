@@ -21,6 +21,10 @@ namespace ComputerStore.Application.Implementations
 
         public async Task<ProductEntity?> GetProductByIdAsync(Guid id, bool includeRelated = false)
         {
+            if (includeRelated)
+            {
+                return await _dbContext.Products.AsNoTracking().Include(p => p.Category).Include(p => p.Supplier).FirstOrDefaultAsync(p => p.Id == id);
+            }
             return await _dbContext.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
         }
 
@@ -45,7 +49,7 @@ namespace ComputerStore.Application.Implementations
         {
             return await _dbContext.Products
                 .AsNoTracking()
-                .Skip((page - 1) * pageSize)
+                .Skip((page - 1) * pageSize).Include(p => p.Category).Include(p => p.Supplier)
                 .Take(pageSize)
                 .ToListAsync();
         }
@@ -54,7 +58,7 @@ namespace ComputerStore.Application.Implementations
         {
             return await _dbContext.Products
                 .AsNoTracking()
-                .Where(p => p.CategoryId == categoryId)
+                .Where(p => p.CategoryId == categoryId).Include(p => p.Category).Include(p => p.Supplier)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
