@@ -5,13 +5,13 @@ namespace ComputerStore.Application
 {
     public class DataManager
     {
-        private readonly ICategoriesRepository _categoriesRepository;
-        private readonly ISuppliersRepository _suppliersRepository;
-        private readonly IProductsRepository _productsRepository;
-        private readonly IRolesRepository _rolesRepository;
-        private readonly ISalesRepository _salesRepository;
-        private readonly ISaleItemsRepository _saleItemsRepository;
-        private readonly IUsersRepository _usersRepository;
+        public ICategoriesRepository CategoriesRepository { get; }
+        public ISuppliersRepository SuppliersRepository { get; }
+        public IProductsRepository ProductsRepository { get; }
+        public IRolesRepository RolesRepository { get; }
+        public ISalesRepository SalesRepository { get; }
+        public ISaleItemsRepository SaleItemsRepository { get; }
+        public IUsersRepository UsersRepository { get; }
 
         public DataManager(
             ICategoriesRepository categoriesRepository,
@@ -22,27 +22,13 @@ namespace ComputerStore.Application
             ISaleItemsRepository saleItemsRepository,
             IUsersRepository usersRepository)
         {
-            _categoriesRepository = categoriesRepository;
-            _suppliersRepository = suppliersRepository;
-            _productsRepository = productsRepository;
-            _rolesRepository = rolesRepository;
-            _salesRepository = salesRepository;
-            _saleItemsRepository = saleItemsRepository;
-            _usersRepository = usersRepository;
+            CategoriesRepository = categoriesRepository;
+            SuppliersRepository = suppliersRepository;
+            ProductsRepository = productsRepository;
+            RolesRepository = rolesRepository;
+            SalesRepository = salesRepository;
+            SaleItemsRepository = saleItemsRepository;
+            UsersRepository = usersRepository;
         }
-
-        public ICategoriesRepository CategoriesRepository => _categoriesRepository;
-
-        public ISuppliersRepository SuppliersRepository => _suppliersRepository;
-
-        public IProductsRepository ProductsRepository => _productsRepository;
-
-        public IRolesRepository RolesRepository => _rolesRepository;
-
-        public ISalesRepository SalesRepository => _salesRepository;
-
-        public ISaleItemsRepository SaleItemsRepository => _saleItemsRepository;
-
-        public IUsersRepository UsersRepository => _usersRepository;
     }
 }
