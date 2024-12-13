@@ -11,6 +11,8 @@
         public Guid SellerId { get; set; }
 
         public UserEntity? Seller { get; set; }
+        public Guid CustomerId { get; set; }
+        public UserEntity? Customer { get; set; }
     }
 }
 
