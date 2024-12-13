@@ -3,11 +3,9 @@ using System.Data;
 
 namespace ComputerStore.Models
 {
-    public class UserEntity : IdentityUser
+    public class ApplicationUserEntity 
     {
         public Guid RoleId { get; set; }
-        
-        public RoleEntity? Role { get; set; }
 
         public List<SaleEntity> Sales { get; set; } = [];
     }

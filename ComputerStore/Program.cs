@@ -7,7 +7,7 @@ namespace ComputerStore
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'ApplicationDbContextConnection' not found.");
@@ -26,17 +26,17 @@ namespace ComputerStore
 
             builder.Services.AddDefaultIdentity<IdentityUser>(options =>
             {
-                options.Password.RequireDigit = false; // Отключить требование цифр
-                options.Password.RequireLowercase = false; // Отключить требование строчных букв
-                options.Password.RequireUppercase = false; // Отключить требование заглавных букв
-                options.Password.RequireNonAlphanumeric = false; // Отключить требование неалфавитных символов
-                options.Password.RequiredLength = 3; // Минимальная длина пароля
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 3;
                 options.SignIn.RequireConfirmedAccount = false;
             })
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             var app = builder.Build();
-
             
             if (!app.Environment.IsDevelopment())
             {
@@ -56,6 +56,24 @@ namespace ComputerStore
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            using(var scope = app.Services.CreateScope())
+            {
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+                var roles = new[] { "Customer", "Seller", "Admin" };
+
+                foreach (var role in roles)
+                {
+                    if (!await roleManager.RoleExistsAsync(role))
+                    {
+                        await roleManager.CreateAsync(new IdentityRole(role));
+                    }
+                }
+            }
+
+
+
 
             app.Run();
         }
