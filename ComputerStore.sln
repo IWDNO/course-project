@@ -3,12 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34525.116
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComputerStore.DataAccess", "ComputerStore.DataAccess\ComputerStore.DataAccess.csproj", "{DBEE8173-C39A-417F-AC68-74B52F4792E1}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComputerStore.MVC", "ComputerStore.MVC\ComputerStore.MVC.csproj", "{BCF50427-42C9-4309-8691-3B5644B034C3}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComputerStore.Application", "ComputerStore.Application\ComputerStore.Application.csproj", "{FBD8BD32-64C6-4473-978F-5FBC4D7646CD}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComputerStore", "ComputerStore\ComputerStore.csproj", "{28334ED6-21AB-4846-AC9C-96E87DE1BAA6}"
 EndProject
 Global
@@ -17,18 +11,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DBEE8173-C39A-417F-AC68-74B52F4792E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DBEE8173-C39A-417F-AC68-74B52F4792E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DBEE8173-C39A-417F-AC68-74B52F4792E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DBEE8173-C39A-417F-AC68-74B52F4792E1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BCF50427-42C9-4309-8691-3B5644B034C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BCF50427-42C9-4309-8691-3B5644B034C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BCF50427-42C9-4309-8691-3B5644B034C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BCF50427-42C9-4309-8691-3B5644B034C3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FBD8BD32-64C6-4473-978F-5FBC4D7646CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FBD8BD32-64C6-4473-978F-5FBC4D7646CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FBD8BD32-64C6-4473-978F-5FBC4D7646CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FBD8BD32-64C6-4473-978F-5FBC4D7646CD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{28334ED6-21AB-4846-AC9C-96E87DE1BAA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{28334ED6-21AB-4846-AC9C-96E87DE1BAA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28334ED6-21AB-4846-AC9C-96E87DE1BAA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
