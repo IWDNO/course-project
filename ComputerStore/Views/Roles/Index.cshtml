@@ -1,0 +1,79 @@
+﻿@model UserListViewModel
+@inject UserManager<IdentityUser> UserManager
+@using Microsoft.AspNetCore.Identity
+@using ComputerStore.Models.ViewModels
+
+<h2>Manage Roles</h2>
+
+<!-- Выпадающий список для фильтрации по ролям -->
+<form method="get" asp-action="Index" asp-controller="Roles">
+    <div class="form-group">
+        <label for="roleFilter">Filter by Role:</label>
+        <select name="roleFilter" class="form-control">
+            <option value="">All</option>
+            <option value="Customer">Customer</option>
+            <option value="Seller">Seller</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Apply Filter</button>
+</form>
+
+<!-- Таблица с пользователями -->
+@if (Model.Users != null && Model.Users.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model.Users)
+            {
+                <tr>
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                    <td>
+                        @if (await UserManager.IsInRoleAsync(user, "Seller"))
+                        {
+                            <span>Seller</span>
+                        }
+                        else
+                        {
+                            <span>Customer</span>
+                        }
+                    </td>
+                    <td>
+                        @if (!await UserManager.IsInRoleAsync(user, "Seller"))
+                        {
+                            <a asp-action="AssignSellerRole" asp-route-userId="@user.Id">Assign Seller</a>
+                        }
+                        else
+                        {
+                            <a asp-action="RevokeSellerRole" asp-route-userId="@user.Id">Revoke Seller</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No users found.</p>
+}
+
+<!-- Пагинация -->
+<nav>
+    <ul class="pagination">
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.Page ? "active" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { page = i, roleFilter = Model.RoleFilter })">@i</a>
+            </li>
+        }
+    </ul>
+</nav>
