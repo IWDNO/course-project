@@ -16,7 +16,7 @@ namespace ComputerStore.MVC
             builder.Services.AddDbContext<ComputerStoreDBContext>(
                 options =>
                 {
-                    options.UseNpgsql(configuration.GetConnectionString(nameof(ComputerStoreDBContext)));
+                    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
                 });
 
             builder.Services.AddScoped<ICategoriesRepository, EFCategoriesRepository>();
