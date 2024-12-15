@@ -1,0 +1,25 @@
+﻿<!-- Views/Sales/_SaleItemRow.cshtml -->
+<div class="productRow row mb-3">
+    <div class="col-md-4">
+        <label>Category:</label>
+        <select name="SaleItems[@ViewData["rowIndex"]].CategoryId" class="categorySelect form-control">
+            @foreach (var category in Model.AvailableCategories)
+            {
+                <option value="@category.Id">@category.Name</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label>Product:</label>
+        <select name="SaleItems[@ViewData["rowIndex"]].ProductId" class="productSelect form-control" disabled>
+            <option value="">-- Select Product --</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label>Quantity:</label>
+        <input type="number" name="SaleItems[@ViewData["rowIndex"]].Quantity" class="quantityInput form-control" min="0" value="0" />
+    </div>
+    <div class="col-md-1 d-flex align-items-end">
+        <button type="button" class="removeProductButton btn btn-danger btn-sm">Remove</button>
+    </div>
+</div>

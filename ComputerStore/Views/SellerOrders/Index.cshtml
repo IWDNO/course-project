@@ -1,0 +1,41 @@
+﻿@model List<SaleEntity>
+
+<h2 class="text-center my-4">Отправленные заказы</h2>
+
+@if (Model.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Sale ID</th>
+                <th>Customer ID</th>
+                <th>Total Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sale in Model)
+            {
+                <tr>
+                    <td>@sale.Id</td>
+                    <td>@sale.CustomerId</td>
+                    <td>@sale.TotalPrice</td>
+                    <td>
+                        <form asp-action="ConfirmOrder" method="post" class="d-inline">
+                            <input type="hidden" name="saleId" value="@sale.Id" />
+                            <button type="submit" class="btn btn-success">Подтвердить</button>
+                        </form>
+                        <form asp-action="CancelOrder" method="post" class="d-inline">
+                            <input type="hidden" name="saleId" value="@sale.Id" />
+                            <button type="submit" class="btn btn-danger">Отменить</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Нет отправленных заказов.</p>
+}

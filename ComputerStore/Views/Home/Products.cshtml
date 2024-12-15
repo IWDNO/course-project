@@ -11,6 +11,7 @@
                 <th>Description</th>
                 <th>Price</th>
                 <th>Stock Quantity</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -21,6 +22,17 @@
                     <td>@product.Description</td>
                     <td>@product.Price</td>
                     <td>@product.StockQuantity</td>
+                    <td>
+                        <form asp-action="AddToCart" method="post">
+                            <input type="hidden" name="productId" value="@product.Id" />
+                            <input type="number" name="quantity" value="1" min="1" max="@product.StockQuantity" class="form-control d-inline-block w-25" />
+                            <button type="submit" class="btn btn-primary">Добавить в корзину</button>
+                        </form>
+                        @if (User.IsInRole("Seller"))
+                        {
+                            <a asp-controller="Sales" asp-action="Create" asp-route-productId="@product.Id" class="btn btn-success ml-2">Оформить заказ</a>
+                        }
+                    </td>
                 </tr>
             }
         </tbody>

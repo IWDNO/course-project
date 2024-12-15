@@ -131,15 +131,6 @@ namespace ComputerStore.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
-                    var customer = new CustomerEntity
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = Input.Name,
-                        IdentityUserId = user.Id
-                    };
-
-                    _context.Customers.Add(customer);
-                    await _context.SaveChangesAsync();
 
                     await _userManager.AddToRoleAsync(user, "Customer");
 

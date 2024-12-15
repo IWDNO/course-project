@@ -3,6 +3,7 @@ using System;
 using ComputerStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ComputerStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241215125157_SaleEntityCustomerNotRequired")]
+    partial class SaleEntityCustomerNotRequired
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,6 +92,7 @@ namespace ComputerStore.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SellerId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("StatusId")
@@ -398,7 +402,8 @@ namespace ComputerStore.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Seller")
                         .WithMany()
                         .HasForeignKey("SellerId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
 
                     b.HasOne("ComputerStore.Models.SaleStatusEntity", "Status")
                         .WithMany("Sales")

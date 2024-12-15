@@ -13,7 +13,7 @@ namespace ComputerStore
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'ApplicationDbContextConnection' not found.");
             var configuration = builder.Configuration;
 
-            
+
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddRazorPages();
@@ -37,11 +37,11 @@ namespace ComputerStore
                 options.Password.RequireLowercase = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequiredLength = 1; 
+                options.Password.RequiredLength = 1;
             });
 
             var app = builder.Build();
-            
+
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -61,7 +61,7 @@ namespace ComputerStore
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
-            using(var scope = app.Services.CreateScope())
+            using (var scope = app.Services.CreateScope())
             {
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
@@ -94,85 +94,44 @@ namespace ComputerStore
                     await userManager.CreateAsync(adminUser, adminPassword);
                     await userManager.AddToRolesAsync(adminUser, new[] { "Admin", "Customer", "Seller" });
 
-                    var adminWorker = new WorkerEntity
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Admin Worker",
-                        IdentityUserId = adminUser.Id
-                    };
-                    context.Workers.Add(adminWorker);
 
-                    var adminCustomer = new CustomerEntity
+                    // Создание пользователей с ролью "Customer"
+                    for (int i = 1; i <= 5; i++)
                     {
-                        Id = Guid.NewGuid(),
-                        Name = $"Admin Customer",
-                        IdentityUserId = adminUser.Id
-                    };
-                    context.Customers.Add(adminCustomer);
-                }
-
-                // Создание пользователей с ролью "Customer"
-                for (int i = 1; i <= 5; i++)
-                {
-                    string customerEmail = $"user{i}@example.com";
-                    string customerPassword = "123123";
-                    if (await userManager.FindByEmailAsync(customerEmail) == null)
-                    {
-                        var customerUser = new IdentityUser
+                        string customerEmail = $"user{i}@example.com";
+                        string customerPassword = "123123";
+                        if (await userManager.FindByEmailAsync(customerEmail) == null)
                         {
-                            Email = customerEmail,
-                            UserName = customerEmail
-                        };
-                        await userManager.CreateAsync(customerUser, customerPassword);
-                        await userManager.AddToRoleAsync(customerUser, "Customer");
+                            var customerUser = new IdentityUser
+                            {
+                                Email = customerEmail,
+                                UserName = customerEmail
+                            };
+                            await userManager.CreateAsync(customerUser, customerPassword);
+                            await userManager.AddToRoleAsync(customerUser, "Customer");
+                        }
+                    }
 
-                        var customer = new CustomerEntity
+                    // Создание пользователей с ролями "Seller" и "Customer"
+                    for (int i = 1; i <= 3; i++)
+                    {
+                        string sellerEmail = $"seller{i}@example.com";
+                        string sellerPassword = "123123";
+                        if (await userManager.FindByEmailAsync(sellerEmail) == null)
                         {
-                            Id = Guid.NewGuid(),
-                            Name = $"Customer {i}",
-                            IdentityUserId = customerUser.Id
-                        };
-                        context.Customers.Add(customer);
+                            var sellerUser = new IdentityUser
+                            {
+                                Email = sellerEmail,
+                                UserName = sellerEmail
+                            };
+                            await userManager.CreateAsync(sellerUser, sellerPassword);
+                            await userManager.AddToRolesAsync(sellerUser, new[] { "Seller", "Customer" });
+                        }
                     }
                 }
 
-                // Создание пользователей с ролями "Seller" и "Customer"
-                for (int i = 1; i <= 3; i++)
-                {
-                    string sellerEmail = $"seller{i}@example.com";
-                    string sellerPassword = "123123";
-                    if (await userManager.FindByEmailAsync(sellerEmail) == null)
-                    {
-                        var sellerUser = new IdentityUser
-                        {
-                            Email = sellerEmail,
-                            UserName = sellerEmail
-                        };
-                        await userManager.CreateAsync(sellerUser, sellerPassword);
-                        await userManager.AddToRolesAsync(sellerUser, new[] { "Seller", "Customer" });
-
-                        // Создание WorkerEntity для продавца
-                        var sellerWorker = new WorkerEntity
-                        {
-                            Id = Guid.NewGuid(),
-                            Name = $"Seller {i}",
-                            IdentityUserId = sellerUser.Id
-                        };
-                        context.Workers.Add(sellerWorker);
-
-                        // Создание CustomerEntity для продавца
-                        var sellerCustomer = new CustomerEntity
-                        {
-                            Id = Guid.NewGuid(),
-                            Name = $"Seller Customer {i}",
-                            IdentityUserId = sellerUser.Id
-                        };
-                        context.Customers.Add(sellerCustomer);
-                    }
-                }
+                app.Run();
             }
-
-            app.Run();
         }
     }
 }

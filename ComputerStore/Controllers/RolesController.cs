@@ -1,21 +1,17 @@
-﻿using ComputerStore.Data;
-using ComputerStore.Models;
-using ComputerStore.Models.ViewModels;
+﻿using ComputerStore.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-[Authorize(Roles = "Admin")] // Доступ только для администраторов
+[Authorize(Roles = "Admin")]
 public class RolesController : Controller
 {
     private readonly UserManager<IdentityUser> _userManager;
-    private readonly ApplicationDbContext _context;
 
-    public RolesController(UserManager<IdentityUser> userManager, ApplicationDbContext context)
+    public RolesController(UserManager<IdentityUser> userManager)
     {
         _userManager = userManager;
-        _context = context;
     }
 
     public async Task<IActionResult> Index(string roleFilter = "", int page = 1, int pageSize = 10)
@@ -36,7 +32,6 @@ public class RolesController : Controller
             }
         }
 
-        var workers = _context.Workers.AsQueryable();
         var totalUsers = await users.CountAsync();
         var totalPages = (int)Math.Ceiling(totalUsers / (double)pageSize);
 
@@ -65,16 +60,6 @@ public class RolesController : Controller
             if (!await _userManager.IsInRoleAsync(user, "Admin"))
             {
                 await _userManager.AddToRoleAsync(user, "Seller");
-
-                var worker = new WorkerEntity
-                {
-                    Id = Guid.NewGuid(),
-                    Name = user.UserName,
-                    IdentityUserId = user.Id
-                };
-
-                _context.Workers.Add(worker);
-                await _context.SaveChangesAsync();
             }
         }
 
@@ -89,13 +74,6 @@ public class RolesController : Controller
             if (!await _userManager.IsInRoleAsync(user, "Admin"))
             {
                 await _userManager.RemoveFromRoleAsync(user, "Seller");
-
-                var worker = await _context.Workers.FirstOrDefaultAsync(w => w.IdentityUserId == user.Id);
-                if (worker != null)
-                {
-                    _context.Workers.Remove(worker);
-                    await _context.SaveChangesAsync();
-                }
             }
         }
 

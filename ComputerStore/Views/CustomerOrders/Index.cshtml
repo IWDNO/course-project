@@ -1,0 +1,131 @@
+﻿@using ComputerStore.Models.ViewModels
+@model CustomerOrdersViewModel
+
+<h2 class="text-center my-4">Мои заказы</h2>
+
+<!-- Заказы в процессе -->
+<h3>Текущие заказы (In Process)</h3>
+@if (Model.InProcessSales.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Sale ID</th>
+                <th>Total Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sale in Model.InProcessSales)
+            {
+                <tr>
+                    <td>@sale.Id</td>
+                    <td>@sale.TotalPrice</td>
+                    <td>
+                        <a asp-action="EditSale" asp-route-saleId="@sale.Id" class="btn btn-primary">Редактировать</a>
+                        <form asp-action="OrderSale" method="post" class="d-inline">
+                            <input type="hidden" name="saleId" value="@sale.Id" />
+                            <button type="submit" class="btn btn-success">Заказать</button>
+                        </form>
+                        <form asp-action="DeleteSale" method="post" class="d-inline">
+                            <input type="hidden" name="saleId" value="@sale.Id" />
+                            <button type="submit" class="btn btn-danger">Удалить</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Нет текущих заказов.</p>
+}
+
+<!-- Заказанные заказы -->
+<h3>Заказанные заказы (Ordered)</h3>
+@if (Model.OrderedSales.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Sale ID</th>
+                <th>Total Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sale in Model.OrderedSales)
+            {
+                <tr>
+                    <td>@sale.Id</td>
+                    <td>@sale.TotalPrice</td>
+                    <td>
+                        <form asp-action="CancelSale" method="post" class="d-inline">
+                            <input type="hidden" name="saleId" value="@sale.Id" />
+                            <button type="submit" class="btn btn-warning">Отменить</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Нет заказанных заказов.</p>
+}
+
+<!-- Завершенные заказы -->
+<h3>Завершенные заказы (Completed)</h3>
+@if (Model.CompletedSales.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Sale ID</th>
+                <th>Total Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sale in Model.CompletedSales)
+            {
+                <tr>
+                    <td>@sale.Id</td>
+                    <td>@sale.TotalPrice</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Нет завершенных заказов.</p>
+}
+
+<!-- Отмененные заказы -->
+<h3>Отмененные заказы (Cancelled)</h3>
+@if (Model.CancelledSales.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Sale ID</th>
+                <th>Total Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sale in Model.CancelledSales)
+            {
+                <tr>
+                    <td>@sale.Id</td>
+                    <td>@sale.TotalPrice</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Нет отмененных заказов.</p>
+}

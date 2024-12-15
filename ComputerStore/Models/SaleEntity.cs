@@ -1,4 +1,6 @@
-﻿namespace ComputerStore.Models
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace ComputerStore.Models
 {
     public class SaleEntity
     {
@@ -7,11 +9,11 @@
 
         public List<SaleItemEntity> SaleItems { get; set; } = [];
 
-        public Guid SellerId { get; set; } 
-        public WorkerEntity? Seller { get; set; } 
+        public string? SellerId { get; set; } 
+        public IdentityUser? Seller { get; set; } 
 
-        public Guid CustomerId { get; set; } 
-        public CustomerEntity? Customer { get; set; }
+        public string? CustomerId { get; set; } 
+        public IdentityUser? Customer { get; set; }
 
         public decimal TotalPrice { get; set; }
 

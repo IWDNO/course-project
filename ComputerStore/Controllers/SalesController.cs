@@ -1,99 +1,124 @@
 ﻿using ComputerStore.Data;
 using ComputerStore.Models;
-using ComputerStore.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Security.Claims;
 
-[Authorize(Roles = "Seller")] // Доступ только для продавцов
-public class SalesController : Controller
+namespace ComputerStore.Controllers
 {
-    private readonly ApplicationDbContext _context;
-    private readonly UserManager<IdentityUser> _userManager;
-
-    public SalesController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+    [Authorize(Roles = "Seller")]
+    public class SalesController : Controller
     {
-        _context = context;
-        _userManager = userManager;
-    }
+        private readonly ApplicationDbContext _context;
 
-    // Отображение формы для оформления продажи
-    public async Task<IActionResult> Create()
-    {
-        var users = _userManager.Users.AsQueryable();
-        var customerIds = await _userManager.GetUsersInRoleAsync("Customer");
-        users = users.Where(u => customerIds.Contains(u));
-
-        var model = new SaleViewModel
+        public SalesController(ApplicationDbContext context)
         {
-            Customers = await _context.Customers.ToListAsync(),
-            Products = await _context.Products.ToListAsync()
-        };
-
-        return View(model);
-    }
-
-    // Обработка данных из формы
-    [HttpPost]
-    public async Task<IActionResult> Create(SaleViewModel model)
-    {
-        if (!ModelState.IsValid)
-        {
-            model.Customers = await _context.Customers.ToListAsync();
-            model.Products = await _context.Products.ToListAsync();
-            return View(model);
+            _context = context;
         }
 
-        // Получаем текущего продавца (авторизованного пользователя)
-        var seller = await _context.Workers.FirstOrDefaultAsync(w => w.IdentityUserId == _userManager.GetUserId(User));
-        if (seller == null)
+        public IActionResult Index()
         {
-            ModelState.AddModelError(string.Empty, "Seller not found.");
-            return View(model);
+            return View();
         }
 
-        // Создаем продажу
-        var sale = new SaleEntity
+        [HttpGet]
+        public IActionResult Create(Guid? productId)
         {
-            Id = Guid.NewGuid(),
-            SaleDate = DateTime.UtcNow,
-            SellerId = seller.Id,
-            CustomerId = model.CustomerId,
-            SaleItems = model.SaleItems.Select(item => new SaleItemEntity
+            var viewModel = new CreateSaleViewModel
             {
-                Id = Guid.NewGuid(),
-                ProductId = item.ProductId,
-                Quantity = item.Quantity,
-                Price = item.Price
-            }).ToList()
-        };
+                AvailableCategories = _context.Categories.ToList(),
+                AvailableProducts = _context.Products.ToList(), // Загружаем все товары
+                AvailableCustomers = _context.Users.ToList() // Загружаем список покупателей
+            };
 
-        // Рассчитываем общую стоимость
-        sale.TotalPrice = sale.SaleItems.Sum(item => item.Price * item.Quantity);
-
-        // Проверяем наличие товаров на складе
-        foreach (var item in sale.SaleItems)
-        {
-            var product = await _context.Products.FindAsync(item.ProductId);
-            if (product == null || product.StockQuantity < item.Quantity)
+            // Если передан productId, добавляем товар в SaleItems
+            if (productId.HasValue)
             {
-                ModelState.AddModelError(string.Empty, $"Not enough stock for product {product?.Name}.");
-                model.Customers = await _context.Customers.ToListAsync();
-                model.Products = await _context.Products.ToListAsync();
-                return View(model);
+                var product = _context.Products.Find(productId.Value);
+                if (product != null)
+                {
+                    viewModel.SaleItems.Add(new SaleItemEntity
+                    {
+                        ProductId = product.Id,
+                        Quantity = 1, // Устанавливаем количество по умолчанию
+                        Price = product.Price
+                    });
+                }
             }
 
-            // Уменьшаем количество товара на складе
-            product.StockQuantity -= item.Quantity;
+            return View(viewModel);
         }
 
-        // Сохраняем продажу в базе данных
-        _context.Sales.Add(sale);
-        await _context.SaveChangesAsync();
+        [HttpGet]
+        public IActionResult GetProductsByCategory(Guid categoryId)
+        {
+            var products = _context.Products
+                .Where(p => p.CategoryId == categoryId)
+                .ToList();
 
-        return RedirectToAction("Index", "Home");
+            return Json(products);
+        }
+
+        [HttpPost]
+        public IActionResult Create(CreateSaleViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                // Фильтруем товары с ненулевым количеством
+                var validSaleItems = viewModel.SaleItems
+                    .Where(item => item.Quantity > 0)
+                    .ToList();
+
+                // Проверяем, что количество товаров в наличии достаточно
+                foreach (var item in validSaleItems)
+                {
+                    var product = _context.Products.Find(item.ProductId);
+                    if (product == null || product.StockQuantity < item.Quantity)
+                    {
+                        ModelState.AddModelError(string.Empty, $"Not enough stock for product {product?.Name}");
+                        viewModel.AvailableProducts = _context.Products.ToList(); // Обновляем список товаров
+                        viewModel.AvailableCustomers = _context.Users.ToList(); // Обновляем список покупателей
+                        return View(viewModel);
+                    }
+                }
+
+                // Создаем продажу
+                var sale = new SaleEntity
+                {
+                    Id = Guid.NewGuid(),
+                    SaleDate = DateTime.UtcNow,
+                    SaleItems = new List<SaleItemEntity>(),
+                    SellerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+                    CustomerId = viewModel.CustomerId == "-- Select Customer --" ? null : viewModel.CustomerId, 
+                    TotalPrice = 0,
+                    StatusId = _context.SaleStatuses.First(s => s.Name == "Completed").Id
+                };
+
+                foreach (var item in validSaleItems)
+                {
+                    var product = _context.Products.Find(item.ProductId);
+                    if (product != null)
+                    {
+                        item.Price = product.Price * item.Quantity;
+
+                        product.StockQuantity -= item.Quantity;
+
+                        sale.SaleItems.Add(item);
+
+                        sale.TotalPrice += item.Price;
+                    }
+                }
+
+                _context.Sales.Add(sale);
+                _context.SaveChanges();
+
+                return RedirectToAction("Create");
+            }
+
+            // Если валидация не прошла, возвращаем модель с ошибками
+            viewModel.AvailableProducts = _context.Products.ToList();
+            viewModel.AvailableCustomers = _context.Users.ToList(); // Обновляем список покупателей
+            return View(viewModel);
+        }
     }
 }
