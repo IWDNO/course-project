@@ -1,0 +1,88 @@
+﻿@model SaleViewModel
+@using ComputerStore.Models.ViewModels
+
+<h2>Create Sale</h2>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label for="CustomerId">Customer</label>
+        <select asp-for="CustomerId" class="form-control">
+            <option value="">-- Select Customer --</option>
+            @foreach (var customer in Model.Customers)
+            {
+                <option value="@customer.Id">@customer.Name</option>
+            }
+        </select>
+    </div>
+
+    <h4>Products</h4>
+    <div id="product-list">
+        @for (int i = 0; i < Model.SaleItems.Count; i++)
+        {
+            <div class="product-item">
+                <div class="form-group">
+                    <label>Product</label>
+                    <select asp-for="SaleItems[i].ProductId" class="form-control">
+                        @foreach (var product in Model.Products)
+                        {
+                            <option value="@product.Id">@product.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <input asp-for="SaleItems[i].Quantity" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Price</label>
+                    <input asp-for="SaleItems[i].Price" class="form-control" readonly />
+                </div>
+                <button type="button" class="btn btn-danger remove-product">Remove</button>
+            </div>
+        }
+    </div>
+
+    <button type="button" id="add-product" class="btn btn-secondary">Add Product</button>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Create Sale</button>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Добавление нового товара
+            $("#add-product").click(function () {
+                var newProductItem = `
+                    <div class="product-item">
+                        <div class="form-group">
+                            <label>Product</label>
+                            <select name="SaleItems[${Model.SaleItems.length}].ProductId" class="form-control">
+        @foreach (var product in Model.Products)
+        {
+                                        <option value="@product.Id">@product.Name</option>
+        }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input name="SaleItems[${Model.SaleItems.length}].Quantity" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label>Price</label>
+                            <input name="SaleItems[${Model.SaleItems.length}].Price" class="form-control" readonly />
+                        </div>
+                        <button type="button" class="btn btn-danger remove-product">Remove</button>
+                    </div>
+                `;
+                $("#product-list").append(newProductItem);
+            });
+
+            // Удаление товара
+            $(document).on("click", ".remove-product", function () {
+                $(this).closest(".product-item").remove();
+            });
+        });
+    </script>
+}

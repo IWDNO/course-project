@@ -19,6 +19,7 @@ namespace ComputerStore.Data
         public DbSet<SupplierEntity> Suppliers { get; set; }
         public DbSet<CustomerEntity> Customers { get; set; }
         public DbSet<WorkerEntity> Workers { get; set; }
+        public DbSet<SaleStatusEntity> SaleStatuses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -29,6 +30,7 @@ namespace ComputerStore.Data
             modelBuilder.ApplyConfiguration(new SupplierConfiguration());
             modelBuilder.ApplyConfiguration(new CustomerEntityConfiguration());
             modelBuilder.ApplyConfiguration(new WorkerEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new SaleStatusConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

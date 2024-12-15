@@ -18,13 +18,10 @@ public class RolesController : Controller
         _context = context;
     }
 
-    // Метод для отображения страницы с фильтрацией и пагинацией
     public async Task<IActionResult> Index(string roleFilter = "", int page = 1, int pageSize = 10)
     {
-        // Получаем всех пользователей
         var users = _userManager.Users.AsQueryable();
 
-        // Фильтрация по роли
         if (!string.IsNullOrEmpty(roleFilter))
         {
             if (roleFilter == "Seller")
@@ -39,7 +36,7 @@ public class RolesController : Controller
             }
         }
 
-        // Пагинация
+        var workers = _context.Workers.AsQueryable();
         var totalUsers = await users.CountAsync();
         var totalPages = (int)Math.Ceiling(totalUsers / (double)pageSize);
 
@@ -48,7 +45,6 @@ public class RolesController : Controller
             .Take(pageSize)
             .ToListAsync();
 
-        // Передаем данные в представление
         var viewModel = new UserListViewModel
         {
             Users = paginatedUsers,
@@ -61,7 +57,6 @@ public class RolesController : Controller
         return View(viewModel);
     }
 
-    // Метод для назначения роли "Продавец"
     public async Task<IActionResult> AssignSellerRole(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
@@ -86,7 +81,6 @@ public class RolesController : Controller
         return RedirectToAction("Index");
     }
 
-    // Метод для отзыва роли "Продавец"
     public async Task<IActionResult> RevokeSellerRole(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);

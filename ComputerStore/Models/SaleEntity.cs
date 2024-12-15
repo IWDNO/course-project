@@ -11,7 +11,20 @@
         public WorkerEntity? Seller { get; set; } 
 
         public Guid CustomerId { get; set; } 
-        public CustomerEntity? Customer { get; set; } 
+        public CustomerEntity? Customer { get; set; }
+
+        public decimal TotalPrice { get; set; }
+
+        public Guid StatusId { get; set; }
+        public SaleStatusEntity? Status { get; set; }
+    }
+
+    public class SaleStatusEntity
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = String.Empty;
+
+        public List<SaleEntity> Sales { get; set; } = [];
     }
 }
 
