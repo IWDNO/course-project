@@ -27,11 +27,10 @@ namespace ComputerStore.Controllers
             var viewModel = new CreateSaleViewModel
             {
                 AvailableCategories = _context.Categories.ToList(),
-                AvailableProducts = _context.Products.ToList(), // Загружаем все товары
-                AvailableCustomers = _context.Users.ToList() // Загружаем список покупателей
+                AvailableProducts = _context.Products.ToList(),
+                AvailableCustomers = _context.Users.ToList()
             };
 
-            // Если передан productId, добавляем товар в SaleItems
             if (productId.HasValue)
             {
                 var product = _context.Products.Find(productId.Value);
@@ -40,7 +39,7 @@ namespace ComputerStore.Controllers
                     viewModel.SaleItems.Add(new SaleItemEntity
                     {
                         ProductId = product.Id,
-                        Quantity = 1, // Устанавливаем количество по умолчанию
+                        Quantity = 1,
                         Price = product.Price
                     });
                 }
@@ -57,6 +56,18 @@ namespace ComputerStore.Controllers
                 .ToList();
 
             return Json(products);
+        }
+
+        [HttpGet]
+        public IActionResult GetProductStock(Guid productId)
+        {
+            var product = _context.Products.Find(productId);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return Json(new { stockQuantity = product.StockQuantity });
         }
 
         [HttpPost]

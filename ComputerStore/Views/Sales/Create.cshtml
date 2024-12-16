@@ -15,7 +15,6 @@
     </div>
 
     <div id="saleItemsContainer" class="mb-3">
-        <!-- Здесь будут добавляться строки с товарами -->
         @for (var i = 0; i < Model.SaleItems.Count; i++)
         {
             <div class="productRow row mb-3">
@@ -33,7 +32,7 @@
                     <select name="SaleItems[@i].ProductId" class="productSelect form-control">
                         @foreach (var product in Model.AvailableProducts)
                         {
-                            <option value="@product.Id" selected="@(product.Id == Model.SaleItems[i].ProductId)">@product.Name - @product.Price</option>
+                            <option value="@product.Id" data-price="@product.Price" selected="@(product.Id == Model.SaleItems[i].ProductId)">@product.Name - @product.Price</option>
                         }
                     </select>
                 </div>
@@ -54,44 +53,47 @@
     </div>
 
     <button type="button" id="addProductButton" class="btn btn-secondary mb-3">Add Product</button>
-    <button type="submit" class="btn btn-primary">Create Sale</button>
+    <button id="submitButton" type="submit" class="btn btn-primary">Create Sale</button>
 </form>
 
 @section Scripts {
     <script>
         $(document).ready(function () {
+            // Флаг для отслеживания валидности формы
+            let isFormValid = true;
+
             // Функция для добавления новой строки с товаром
             function addProductRow() {
                 var rowIndex = $('#saleItemsContainer').children().length;
                 var newRow = `
-                            <div class="productRow row mb-3">
-                                <div class="col-md-4">
-                                    <label>Category:</label>
-                                    <select name="SaleItems[${rowIndex}].CategoryId" class="categorySelect form-control">
+                    <div class="productRow row mb-3">
+                        <div class="col-md-4">
+                            <label>Category:</label>
+                            <select name="SaleItems[${rowIndex}].CategoryId" class="categorySelect form-control">
         @foreach (var category in Model.AvailableCategories)
         {
-                                                <option value="@category.Id">@category.Name</option>
+                                        <option value="@category.Id">@category.Name</option>
         }
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label>Product:</label>
-                                    <select name="SaleItems[${rowIndex}].ProductId" class="productSelect form-control">
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Product:</label>
+                            <select name="SaleItems[${rowIndex}].ProductId" class="productSelect form-control">
         @foreach (var product in Model.AvailableProducts)
         {
-                                                <option value="@product.Id">@product.Name - @product.Price</option>
+                                        <option value="@product.Id" data-price="@product.Price">@product.Name - @product.Price</option>
         }
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label>Quantity:</label>
-                                    <input type="number" name="SaleItems[${rowIndex}].Quantity" class="quantityInput form-control" min="0" value="0" />
-                                </div>
-                                <div class="col-md-1 d-flex align-items-end">
-                                    <button type="button" class="removeProductButton btn btn-danger btn-sm">Remove</button>
-                                </div>
-                            </div>
-                        `;
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Quantity:</label>
+                            <input type="number" name="SaleItems[${rowIndex}].Quantity" class="quantityInput form-control" min="0" value="0" />
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="button" class="removeProductButton btn btn-danger btn-sm">Remove</button>
+                        </div>
+                    </div>
+                `;
                 $('#saleItemsContainer').append(newRow);
             }
 
@@ -121,13 +123,44 @@
 
             // Обработчик изменения количества товара
             $('#saleItemsContainer').on('input', '.quantityInput', function () {
+                checkStock($(this));
                 calculateTotalPrice();
             });
 
             // Обработчик изменения товара
             $('#saleItemsContainer').on('change', '.productSelect', function () {
+                checkStock($(this).closest('.productRow').find('.quantityInput'));
                 calculateTotalPrice();
             });
+
+            // Функция для проверки наличия товара на складе
+            function checkStock(quantityInput) {
+                var productId = quantityInput.closest('.productRow').find('.productSelect').val();
+                var quantity = parseInt(quantityInput.val()) || 0;
+
+                if (productId && quantity > 0) {
+                    $.ajax({
+                        url: '/Sales/GetProductStock',
+                        type: 'GET',
+                        data: { productId: productId },
+                        success: function (data) {
+                            if (quantity > data.stockQuantity) {
+                                quantityInput.addClass('is-invalid');
+                                quantityInput.after(`<div class="invalid-feedback">Not enough stock. Available: ${data.stockQuantity}</div>`);
+                                isFormValid = false; // Устанавливаем флаг в false
+                            } else {
+                                quantityInput.removeClass('is-invalid');
+                                quantityInput.next('.invalid-feedback').remove();
+                                isFormValid = true; // Устанавливаем флаг в true
+                            }
+                            updateSubmitButtonState(); // Обновляем состояние кнопки
+                        }
+                    });
+                } else {
+                    isFormValid = true; // Если количество 0, форма валидна
+                    updateSubmitButtonState(); // Обновляем состояние кнопки
+                }
+            }
 
             // Функция для расчета общей цены
             function calculateTotalPrice() {
@@ -140,6 +173,15 @@
                 $('#totalPrice').val(totalPrice.toFixed(2));
             }
 
+            // Функция для обновления состояния кнопки отправки
+            function updateSubmitButtonState() {
+                if (isFormValid) {
+                    $('#submitButton').prop('disabled', false); // Разблокируем кнопку
+                } else {
+                    $('#submitButton').prop('disabled', true); // Блокируем кнопку
+                }
+            }
+
             // Обработчик кнопки "Add Product"
             $('#addProductButton').click(function () {
                 addProductRow();
@@ -149,15 +191,13 @@
             $('#saleItemsContainer').on('click', '.removeProductButton', function () {
                 $(this).closest('.productRow').remove();
                 calculateTotalPrice();
+                checkStock($('.quantityInput').last()); 
             });
 
-            // Автоматически выбираем товар, если он был передан
-            $('.productSelect').each(function () {
-                var selectedProductId = $(this).val();
-                if (selectedProductId) {
-                    $(this).find(`option[value="${selectedProductId}"]`).prop('selected', true);
-                }
-            });
+
+            // Инициализация состояния кнопки
+            updateSubmitButtonState();
+            calculateTotalPrice();
         });
     </script>
 }

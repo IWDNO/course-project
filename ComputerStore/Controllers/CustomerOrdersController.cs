@@ -44,6 +44,18 @@ namespace ComputerStore.Controllers
             return View(viewModel);
         }
 
+        [HttpGet]
+        public IActionResult GetProductStock(Guid productId)
+        {
+            var product = _context.Products.Find(productId);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return Json(new { stockQuantity = product.StockQuantity });
+        }
+
         [HttpPost]
         public async Task<IActionResult> OrderSale(Guid saleId)
         {
@@ -93,6 +105,7 @@ namespace ComputerStore.Controllers
         public async Task<IActionResult> DeleteSale(Guid saleId)
         {
             var sale = await _context.Sales
+                .Include(s => s.Status)
                 .Include(s => s.SaleItems)
                 .ThenInclude(si => si.Product)
                 .FirstOrDefaultAsync(s => s.Id == saleId);

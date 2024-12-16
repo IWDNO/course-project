@@ -29,6 +29,7 @@ namespace ComputerStore.Controllers
         {
             var category = await _context.Categories
                 .Include(c => c.Products)
+                .OrderBy(c => c.Name)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (category == null)
@@ -38,6 +39,7 @@ namespace ComputerStore.Controllers
 
             // Пагинация товаров
             var products = category.Products
+                .OrderBy(p => p.Name)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();

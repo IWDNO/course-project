@@ -33,7 +33,6 @@ namespace ComputerStore.Controllers
         [HttpPost]
         public async Task<IActionResult> ConfirmOrder(Guid saleId)
         {
-            // Загружаем заказ вместе с его статусом
             var sale = await _context.Sales
                 .Include(s => s.Status)
                 .FirstOrDefaultAsync(s => s.Id == saleId);
@@ -41,6 +40,8 @@ namespace ComputerStore.Controllers
             if (sale != null && sale.Status.Name == "Ordered")
             {
                 sale.StatusId = _context.SaleStatuses.First(s => s.Name == "Completed").Id;
+                sale.SellerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                sale.SaleDate = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
             }
 
@@ -50,7 +51,6 @@ namespace ComputerStore.Controllers
         [HttpPost]
         public async Task<IActionResult> CancelOrder(Guid saleId)
         {
-            // Загружаем заказ вместе с его статусом и товарами
             var sale = await _context.Sales
                 .Include(s => s.Status)
                 .Include(s => s.SaleItems)
@@ -59,7 +59,6 @@ namespace ComputerStore.Controllers
 
             if (sale != null && sale.Status.Name == "Ordered")
             {
-                // Возвращаем товары на склад
                 foreach (var item in sale.SaleItems)
                 {
                     if (item.Product != null)
@@ -68,8 +67,9 @@ namespace ComputerStore.Controllers
                     }
                 }
 
-                // Меняем статус заказа на "Cancelled"
                 sale.StatusId = _context.SaleStatuses.First(s => s.Name == "Cancelled").Id;
+                sale.SellerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                sale.SaleDate = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
             }
 

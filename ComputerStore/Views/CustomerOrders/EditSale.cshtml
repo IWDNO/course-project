@@ -3,19 +3,8 @@
 <h2 class="text-center mb-4">Edit Sale</h2>
 
 <form asp-action="EditSale" asp-route-saleId="@Model.SaleItems.First().SaleId" method="post">
-    <div class="mb-3">
-        <label>Customer:</label>
-        <select asp-for="CustomerId" class="form-control">
-            <option value="">Покупатель без Аккаунта</option>
-            @foreach (var customer in Model.AvailableCustomers)
-            {
-                <option value="@customer.Id" selected="@(customer.Id == Model.CustomerId)">@customer.UserName</option>
-            }
-        </select>
-    </div>
 
     <div id="saleItemsContainer" class="mb-3">
-        <!-- Здесь будут добавляться строки с товарами -->
         @for (var i = 0; i < Model.SaleItems.Count; i++)
         {
             <div class="productRow row mb-3">
@@ -33,7 +22,7 @@
                     <select name="SaleItems[@i].ProductId" class="productSelect form-control">
                         @foreach (var product in Model.AvailableProducts)
                         {
-                            <option value="@product.Id" selected="@(product.Id == Model.SaleItems[i].ProductId)">@product.Name - @product.Price</option>
+                            <option value="@product.Id" data-price="@product.Price" selected="@(product.Id == Model.SaleItems[i].ProductId)">@product.Name - @product.Price</option>
                         }
                     </select>
                 </div>
@@ -54,14 +43,12 @@
     </div>
 
     <button type="button" id="addProductButton" class="btn btn-secondary mb-3">Add Product</button>
-    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <button id="submitButton" type="submit" class="btn btn-primary">Save Changes</button>
 </form>
 
 @section Scripts {
     <script>
         $(document).ready(function () {
-            // Инициализация общей стоимости при загрузке страницы
-
 
             // Функция для добавления новой строки с товаром
             function addProductRow() {
@@ -97,6 +84,35 @@
                 `;
                 $('#saleItemsContainer').append(newRow);
                 calculateTotalPrice(); // Пересчитываем общую стоимость после добавления строки
+            }
+
+            // Функция для проверки наличия товара на складе
+            function checkStock(quantityInput) {
+                var productId = quantityInput.closest('.productRow').find('.productSelect').val();
+                var quantity = parseInt(quantityInput.val()) || 0;
+
+                if (productId && quantity > 0) {
+                    $.ajax({
+                        url: '/Sales/GetProductStock',
+                        type: 'GET',
+                        data: { productId: productId },
+                        success: function (data) {
+                            if (quantity > data.stockQuantity) {
+                                quantityInput.addClass('is-invalid');
+                                quantityInput.after(`<div class="invalid-feedback">Not enough stock. Available: ${data.stockQuantity}</div>`);
+                                isFormValid = false; // Устанавливаем флаг в false
+                            } else {
+                                quantityInput.removeClass('is-invalid');
+                                quantityInput.next('.invalid-feedback').remove();
+                                isFormValid = true; // Устанавливаем флаг в true
+                            }
+                            updateSubmitButtonState(); // Обновляем состояние кнопки
+                        }
+                    });
+                } else {
+                    isFormValid = true; // Если количество 0, форма валидна
+                    updateSubmitButtonState(); // Обновляем состояние кнопки
+                }
             }
 
             // Функция пересчёта общей стоимости
@@ -139,13 +155,24 @@
                 }
             });
 
+            // Функция для обновления состояния кнопки отправки
+            function updateSubmitButtonState() {
+                if (isFormValid) {
+                    $('#submitButton').prop('disabled', false); // Разблокируем кнопку
+                } else {
+                    $('#submitButton').prop('disabled', true); // Блокируем кнопку
+                }
+            }
+
             // Обработчик изменения количества товара
             $('#saleItemsContainer').on('input', '.quantityInput', function () {
+                checkStock($(this));
                 calculateTotalPrice();
             });
 
             // Обработчик изменения товара
             $('#saleItemsContainer').on('change', '.productSelect', function () {
+                checkStock($(this).closest('.productRow').find('.quantityInput'));
                 calculateTotalPrice();
             });
 
@@ -158,8 +185,10 @@
             $('#saleItemsContainer').on('click', '.removeProductButton', function () {
                 $(this).closest('.productRow').remove();
                 calculateTotalPrice();
+                checkStock($('.quantityInput').last());
             });
 
+            updateSubmitButtonState();
             calculateTotalPrice();
         });
 
