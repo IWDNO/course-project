@@ -1,0 +1,53 @@
+﻿@model SalesReportViewModel
+@using ComputerStore.Models.ViewModels
+
+<h2 class="text-center my-4">Отчет по продажам</h2>
+
+<form id="reportForm" class="mb-4">
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <label for="sellerEmail">Email продавца:</label>
+            <select id="sellerEmail" name="sellerEmail" class="form-control">
+                <option value="">Все продавцы</option>
+                @foreach (var seller in Model.Sellers)
+                {
+                    <option value="@seller.Email">@seller.Email</option>
+                }
+            </select>
+        </div>
+        <div class="form-group col-md-4">
+            <label for="startDate">Начальная дата:</label>
+            <input type="date" id="startDate" name="startDate" class="form-control" value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="form-group col-md-4">
+            <label for="endDate">Конечная дата:</label>
+            <input type="date" id="endDate" name="endDate" class="form-control" value="@Model.EndDate.ToString("yyyy-MM-dd")" />
+        </div>
+    </div>
+    <button type="button" id="generateReport" class="btn btn-primary">Сгенерировать отчет</button>
+</form>
+
+<div id="reportContainer" class="border p-4 rounded shadow-sm">
+    <!-- Здесь будет отображаться отчет -->
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#generateReport').click(function () {
+                var sellerEmail = $('#sellerEmail').val();
+                var startDate = $('#startDate').val();
+                var endDate = $('#endDate').val();
+
+                $.ajax({
+                    url: '/SalesReport/GetReport',
+                    type: 'POST',
+                    data: { sellerEmail: sellerEmail, startDate: startDate, endDate: endDate },
+                    success: function (data) {
+                        $('#reportContainer').html(data);
+                    }
+                });
+            });
+        });
+    </script>
+}
