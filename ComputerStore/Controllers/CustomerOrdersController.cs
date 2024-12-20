@@ -19,12 +19,10 @@ namespace ComputerStore.Controllers
             _context = context;
         }
 
-        // Отображение всех заказов покупателя
         public async Task<IActionResult> Index()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            // Получаем все заказы покупателя
             var sales = await _context.Sales
                 .Include(s => s.SaleItems)
                 .ThenInclude(si => si.Product)
@@ -32,7 +30,6 @@ namespace ComputerStore.Controllers
                 .Where(s => s.CustomerId == userId)
                 .ToListAsync();
 
-            // Группируем заказы по статусам
             var viewModel = new CustomerOrdersViewModel
             {
                 InProcessSales = sales.Where(s => s.Status.Name == "In Process").ToList(),
@@ -42,6 +39,23 @@ namespace ComputerStore.Controllers
             };
 
             return View(viewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetSaleDetails(Guid saleId)
+        {
+            var sale = await _context.Sales
+                .Include(s => s.SaleItems)
+                .ThenInclude(si => si.Product)
+                .Include(s => s.Status)
+                .FirstOrDefaultAsync(s => s.Id == saleId);
+
+            if (sale == null)
+            {
+                return NotFound();
+            }
+
+            return PartialView("_SaleDetailsPartial", sale);
         }
 
         [HttpGet]

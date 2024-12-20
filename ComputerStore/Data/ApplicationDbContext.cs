@@ -18,6 +18,8 @@ namespace ComputerStore.Data
         public DbSet<SaleItemEntity> SaleItems { get; set; }
         public DbSet<SupplierEntity> Suppliers { get; set; }
         public DbSet<SaleStatusEntity> SaleStatuses { get; set; }
+        public DbSet<WriteOffEntity> WriteOffs { get; set; }
+        public DbSet<WriteOffItemEntity> WriteOffItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,6 +29,8 @@ namespace ComputerStore.Data
             modelBuilder.ApplyConfiguration(new SaleItemConfiguration());
             modelBuilder.ApplyConfiguration(new SupplierConfiguration());
             modelBuilder.ApplyConfiguration(new SaleStatusConfiguration());
+            modelBuilder.ApplyConfiguration(new WriteOffConfiguration());
+            modelBuilder.ApplyConfiguration(new WriteOffItemConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

@@ -1,0 +1,41 @@
+﻿@model List<WriteOffEntity>
+
+<h2 class="text-center my-4">История списаний</h2>
+
+@if (Model.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Дата списания</th>
+                <th>Причина</th>
+                <th>Менеджер</th>
+                <th>Товары</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var writeOff in Model)
+            {
+                <tr>
+                    <td>@writeOff.WriteOffDate.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@writeOff.Reason</td>
+                    <td>@writeOff.Manager?.Email</td>
+                    <td>
+                        <ul>
+                            @foreach (var item in writeOff.WriteOffItems)
+                            {
+                                <li>@item.Product?.Name - @item.Quantity шт.</li>
+                            }
+                        </ul>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Нет записей о списаниях.</p>
+}
+
+<a asp-action="Create" class="btn btn-primary">Создать новое списание</a>

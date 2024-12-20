@@ -1,0 +1,135 @@
+﻿@model WriteOffViewModel
+@using ComputerStore.Models.ViewModels
+
+<h2 class="text-center my-4">Создание нового списания</h2>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label for="Reason">Причина списания:</label>
+        <textarea asp-for="Reason" class="form-control"></textarea>
+    </div>
+
+    <div id="writeOffItemsContainer">
+    </div>
+
+    <button type="button" id="addProductButton" class="btn btn-secondary mb-3">Добавить товар</button>
+
+    <div class="alert alert-danger mt-3" id="errorMessage" style="display: none;"></div>
+    <button id ="submitButton" type="submit" class="btn btn-primary">Создать списание</button>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            function addProductRow() {
+                var rowIndex = $('#writeOffItemsContainer').children().length;
+                var newRow = `
+                    <div class="productRow row mb-3">
+                        <div class="col-md-4">
+                            <label>Товар:</label>
+                            <select name="WriteOffItems[${rowIndex}].ProductId" class="productSelect form-control">
+        @foreach (var product in Model.Products)
+        {
+                                        <option value="@product.Id">@product.Name</option>
+        }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Количество:</label>
+                            <div class="input-group">
+                                <input type="number" name="WriteOffItems[${rowIndex}].Quantity" class="quantityInput form-control" min="1" value="1" />
+                                <button type="button" class="writeOffAllButton btn btn-outline-secondary btn-sm">Списать все</button>
+                            </div>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="button" class="removeProductButton btn btn-danger btn-sm">Удалить</button>
+                        </div>
+                    </div>
+                `;
+                $('#writeOffItemsContainer').append(newRow);
+            }
+
+            function validateForm() {
+                var isValid = true;
+                var errorMessage = '';
+
+                $('#writeOffItemsContainer .productRow').each(function () {
+                    var productId = $(this).find('.productSelect').val();
+                    var quantity = parseInt($(this).find('.quantityInput').val());
+
+                    $.ajax({
+                        url: '/WriteOff/GetProductStockQuantity',
+                        type: 'GET',
+                        data: { productId: productId },
+                        async: false, // Синхронный запрос для проверки
+                        success: function (data) {
+                            if (quantity > data.stockQuantity) {
+                                isValid = false;
+                                errorMessage += `Недостаточно товаров на складе для "${$(this).find('.productSelect option:selected').text()}". Доступно: ${data.stockQuantity}.<br>`;
+                            }
+                        },
+                        error: function () {
+                            isValid = false;
+                            errorMessage += 'Ошибка при проверке количества товара.<br>';
+                        }
+                    });
+                });
+
+                if (isValid) {
+                    $('#errorMessage').hide();
+                    $('#submitButton').prop('disabled', false);
+                } else {
+                    $('#errorMessage').html(errorMessage).show();
+                    $('#submitButton').prop('disabled', true);
+                }
+            }
+
+            $('#addProductButton').click(function () {
+                addProductRow();
+            });
+
+            $('#writeOffItemsContainer').on('click', '.removeProductButton', function () {
+                $(this).closest('.productRow').remove();
+            });
+
+            $('#writeOffItemsContainer').on('click', '.writeOffAllButton', function () {
+                var productId = $(this).closest('.productRow').find('.productSelect').val();
+                var productName = $(this).closest('.productRow').find('.productSelect option:selected').text();
+                var quantityInput = $(this).closest('.productRow').find('.quantityInput');
+
+                // Получаем количество товара на складе
+                $.ajax({
+                    url: '/WriteOff/GetProductStockQuantity',
+                    type: 'GET',
+                    data: { productId: productId },
+                    success: function (data) {
+                        if (data.stockQuantity > 0) {
+                            quantityInput.val(data.stockQuantity);
+                        } else {
+                            alert('Товара "' + productName + '" на складе нет.');
+                        }
+                    },
+                    error: function () {
+                        alert('Ошибка при получении количества товара.');
+                    }
+                });
+            });
+
+            $('#writeOffItemsContainer').on('click', '.removeProductButton', function () {
+                $(this).closest('.productRow').remove();
+                validateForm();
+            });
+
+            $('#writeOffItemsContainer').on('change', '.productSelect', function () {
+                validateForm();
+            });
+
+            $('#writeOffItemsContainer').on('input', '.quantityInput', function () {
+                validateForm();
+            });
+
+            addProductRow();
+            validateForm();
+        });
+    </script>
+}

@@ -21,14 +21,4 @@ namespace ComputerStore.Data
             builder.HasOne(s => s.Status).WithMany(s => s.Sales).HasForeignKey(s => s.StatusId);
         }
     }
-
-    public class SaleStatusConfiguration : IEntityTypeConfiguration<SaleStatusEntity>
-    {
-        public void Configure(EntityTypeBuilder<SaleStatusEntity> builder)
-        {
-            builder.HasKey(x => x.Id);
-
-            builder.HasMany(s => s.Sales).WithOne(s => s.Status).HasForeignKey(s => s.StatusId);
-        }
-    }
 }

@@ -3,6 +3,7 @@ using System;
 using ComputerStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ComputerStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241220154816_AddWriteOffEntities")]
+    partial class AddWriteOffEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,20 +202,20 @@ namespace ComputerStore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid");
-
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
                     b.Property<Guid>("WriteOffId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("productId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
-
                     b.HasIndex("WriteOffId");
+
+                    b.HasIndex("productId");
 
                     b.ToTable("WriteOffItems");
                 });
@@ -493,15 +496,15 @@ namespace ComputerStore.Migrations
 
             modelBuilder.Entity("ComputerStore.Models.WriteOffItemEntity", b =>
                 {
-                    b.HasOne("ComputerStore.Models.ProductEntity", "Product")
-                        .WithMany("WriteOffItems")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("ComputerStore.Models.WriteOffEntity", "WriteOff")
                         .WithMany("WriteOffItems")
                         .HasForeignKey("WriteOffId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ComputerStore.Models.ProductEntity", "Product")
+                        .WithMany("WriteOffItems")
+                        .HasForeignKey("productId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

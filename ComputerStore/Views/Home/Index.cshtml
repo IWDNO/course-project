@@ -1,7 +1,36 @@
-﻿@{
+﻿@using System.Security.Claims
+@{
     ViewData["Title"] = "Home Page";
 }
 @model List<CategoryEntity>
+
+<div class="container mt-5">
+                @if (User.IsInRole("Admin"))
+            {
+        <div class="card p-4 mb-4 bg-light">
+            <h5 class="card-title text-center">Управление магазином</h5>
+            <div class="d-flex justify-content-center">
+
+                <a asp-controller="WriteOff" asp-action="Index" class="btn btn-primary mx-2">Списания</a>
+                <a asp-controller="Roles" asp-action="Index" class="btn btn-primary mx-2">Управление персоналом</a>
+                <a asp-controller="SalesReport" asp-action="Index" class="btn btn-primary mx-2">Отчеты</a>
+                
+            </div>
+        </div>
+            }
+    @if (User.IsInRole("Seller"))
+    {
+        <div class="card  p-4 mb-4 bg-light">
+            <h5 class="card-title text-center">Работа в магазие</h5>
+            <div class="d-flex justify-content-center">
+
+                <a asp-controller="Sales" asp-action="Index" class="btn btn-primary mx-2">Продажи</a>
+                <a class="btn btn-primary mx-2" asp-controller="SellerOrders" asp-action="Index" asp-authorize asp-roles="Seller">Управление заказами</a>
+
+            </div>
+        </div>
+    }
+</div>
 
 <div class="container">
     <h2 class="text-center my-4">Каталог товаров</h2>

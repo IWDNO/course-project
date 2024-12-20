@@ -1,0 +1,35 @@
+﻿@model SaleEntity
+
+<div class="row">
+    <div class="col-md-6">
+        <h5>Дата Заказа:</h5>
+        <p>@Model.SaleDate.ToLocalTime()</p>
+    </div>
+    <div class="col-md-6">
+        <h5>Общая стоимость:</h5>
+        <p>@Model.TotalPrice.ToString("C")</p>
+    </div>
+</div>
+
+<h5>Товары:</h5>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Товар</th>
+            <th>Количество</th>
+            <th>Цена за единицу</th>
+            <th>Общая цена</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.SaleItems)
+        {
+            <tr>
+                <td>@item.Product.Name</td>
+                <td>@item.Quantity</td>
+                <td>@item.Product.Price.ToString("C")</td>
+                <td>@((item.Product.Price * item.Quantity).ToString("C"))</td>
+            </tr>
+        }
+    </tbody>
+</table>

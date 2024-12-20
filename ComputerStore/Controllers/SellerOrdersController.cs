@@ -30,6 +30,23 @@ namespace ComputerStore.Controllers
             return View(orders);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetSaleDetails(Guid saleId)
+        {
+            var sale = await _context.Sales
+                .Include(s => s.SaleItems)
+                .ThenInclude(si => si.Product)
+                .Include(s => s.Status)
+                .FirstOrDefaultAsync(s => s.Id == saleId);
+
+            if (sale == null)
+            {
+                return NotFound();
+            }
+
+            return PartialView("_SaleDetailsPartial", sale);
+        }
+
         [HttpPost]
         public async Task<IActionResult> ConfirmOrder(Guid saleId)
         {

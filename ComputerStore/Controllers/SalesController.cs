@@ -2,6 +2,7 @@
 using ComputerStore.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace ComputerStore.Controllers
@@ -18,7 +19,34 @@ namespace ComputerStore.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            var sellerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            // Получаем все продажи, совершенные текущим продавцом
+            var sales = _context.Sales
+                .Where(s => s.SellerId == sellerId)
+                .Include(s => s.Status)
+                .Include(s => s.Customer)
+                .OrderByDescending(s => s.SaleDate)
+                .ToList();
+
+            return View(sales);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetSaleDetails(Guid saleId)
+        {
+            var sale = await _context.Sales
+                .Include(s => s.SaleItems)
+                .ThenInclude(si => si.Product)
+                .Include(s => s.Status)
+                .FirstOrDefaultAsync(s => s.Id == saleId);
+
+            if (sale == null)
+            {
+                return NotFound();
+            }
+
+            return PartialView("_SaleDetailsPartial", sale);
         }
 
         [HttpGet]
@@ -75,25 +103,22 @@ namespace ComputerStore.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Фильтруем товары с ненулевым количеством
                 var validSaleItems = viewModel.SaleItems
                     .Where(item => item.Quantity > 0)
                     .ToList();
 
-                // Проверяем, что количество товаров в наличии достаточно
                 foreach (var item in validSaleItems)
                 {
                     var product = _context.Products.Find(item.ProductId);
                     if (product == null || product.StockQuantity < item.Quantity)
                     {
                         ModelState.AddModelError(string.Empty, $"Not enough stock for product {product?.Name}");
-                        viewModel.AvailableProducts = _context.Products.ToList(); // Обновляем список товаров
-                        viewModel.AvailableCustomers = _context.Users.ToList(); // Обновляем список покупателей
+                        viewModel.AvailableProducts = _context.Products.ToList();
+                        viewModel.AvailableCustomers = _context.Users.ToList();
                         return View(viewModel);
                     }
                 }
 
-                // Создаем продажу
                 var sale = new SaleEntity
                 {
                     Id = Guid.NewGuid(),
@@ -126,9 +151,8 @@ namespace ComputerStore.Controllers
                 return RedirectToAction("Create");
             }
 
-            // Если валидация не прошла, возвращаем модель с ошибками
             viewModel.AvailableProducts = _context.Products.ToList();
-            viewModel.AvailableCustomers = _context.Users.ToList(); // Обновляем список покупателей
+            viewModel.AvailableCustomers = _context.Users.ToList();
             return View(viewModel);
         }
     }

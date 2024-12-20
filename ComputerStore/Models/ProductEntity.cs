@@ -21,6 +21,8 @@
         public SupplierEntity? Supplier { get; set; }
 
         public List<SaleItemEntity> SaleItems { get; set; } = [];
+
+        public List<WriteOffItemEntity> WriteOffItems { get; set; } = [];
     }
 }
 
